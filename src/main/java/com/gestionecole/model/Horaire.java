@@ -9,9 +9,10 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class Horaire {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,11 +22,6 @@ public class Horaire {
     private String heureFin;
 
     @ManyToOne
-    @JoinColumn(name = "cours_id")
+    @JoinColumn(name = "cours_id", nullable = false)
     private Cours cours;
-
-    @ManyToOne
-    @JoinColumn(name = "annee_section_id")
-    private AnneeSection anneeSection;
-
 }
