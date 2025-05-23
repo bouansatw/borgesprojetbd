@@ -1,7 +1,10 @@
 package com.gestionecole.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
@@ -15,28 +18,17 @@ import java.util.List;
 @PrimaryKeyJoinColumn(name = "id")
 public class Etudiant extends Utilisateur {
 
-    @ManyToOne
-    @JoinColumn(name = "section_id")
-    private Section section;
-
-    @OneToMany(mappedBy = "etudiant")
+    @OneToMany(mappedBy = "etudiant", cascade = CascadeType.ALL)
     private List<Inscription> inscriptions;
-
-    @OneToMany(mappedBy = "etudiant")
-    private List<Note> notes;
 
     @Transient
     private Note noteForCours;
-
-    @ManyToOne
-    @JoinColumn(name = "annee_section_id")
-    private AnneeSection anneeSection;
 
     private String info;
     private String photo;
 
     public boolean isInscrit() {
-        return this.section != null;
+        return inscriptions != null && !inscriptions.isEmpty();
     }
 
     @Override
