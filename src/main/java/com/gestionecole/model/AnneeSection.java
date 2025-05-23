@@ -1,14 +1,16 @@
 package com.gestionecole.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+
+import java.util.List;
 
 @Entity
-@Getter
-@Setter
-@NoArgsConstructor // Si vous utilisez Lombok, cette annotation génère le constructeur par défaut
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AnneeSection {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,11 +22,9 @@ public class AnneeSection {
     @JoinColumn(name = "section_id")
     private Section section;
 
+    @OneToMany(mappedBy = "anneeSection", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Cours> cours;
 
-    public AnneeSection(String anneeAcademique, Section section) {
-        this.anneeAcademique = anneeAcademique;
-        this.section = section;
-    }
 
     @Override
     public String toString() {

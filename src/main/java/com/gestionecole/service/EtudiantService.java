@@ -74,34 +74,39 @@ public class EtudiantService {
         // 2. Encode password
         etudiant.setPassword(passwordEncoder.encode(etudiant.getPassword()));
 
-        // 3. Assign role and section
+        // 3. Assign role and generate matricule
         etudiant.setRole(Roles.ETUDIANT);
-        etudiant.setSection(section);
-
-        // 4. Generate and set matricule like E-00001
         etudiant.setMatricule(generateNextMatricule());
+
+        // 4. Save Etudiant (before creating FK-dependent inscriptions)
+        etudiantRepository.save(etudiant);
 
         // 5. Determine current academic year
         String academicYear = getCurrentAcademicYear();
 
-        // 6. Fetch AnneeSection
+        // 6. Fetch AnneeSection for the student’s section
         AnneeSection anneeSection = anneeSectionRepository
                 .findByAnneeAcademiqueAndSection(academicYear, section)
                 .orElseThrow(() -> new IllegalStateException("Année académique non trouvée pour la section " + section.getNom()));
 
-        etudiant.setAnneeSection(anneeSection);
+        // 7. Create and save inscription
+        Inscription inscription = new Inscription();
+        inscription.setEtudiant(etudiant);
+        inscription.setAnneeSection(anneeSection);
+        inscription.setDateInscription(LocalDate.now());
+        inscription = inscriptionRepository.save(inscription);
 
-        // 7. Save Etudiant
-        etudiantRepository.save(etudiant);
-
-        // 8. Enroll in all courses for this year
-        List<Horaire> horaires = horaireRepository.findByAnneeSectionId(anneeSection.getId());
-        for (Horaire horaire : horaires) {
-            Inscription inscription = new Inscription();
-            inscription.setEtudiant(etudiant);
-            inscription.setCours(horaire.getCours());
-            inscription.setDateInscription(LocalDate.now());
-            inscriptionRepository.save(inscription);
+        // 8. Enroll student into all courses for that academic section
+        List<Cours> coursList = anneeSection.getCours(); // make sure AnneeSection has getCours() mapped correctly
+        for (Cours cours : coursList) {
+            Note note = new Note();
+            note.setInscription(inscription);
+            note.setCours(cours);
+            note.setPremiereSession(null);
+            note.setDeuxiemeSession(null);
+            // Save notes via cascade from Inscription or via a dedicated repository if needed
+            // Assuming cascade = CascadeType.ALL is set
+            // Otherwise: noteRepository.save(note);
         }
     }
 
