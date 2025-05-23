@@ -2,10 +2,20 @@ package com.gestionecole.repository;
 
 import com.gestionecole.model.Horaire;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface HoraireRepository extends JpaRepository<Horaire, Long> {
-    List<Horaire> findByAnneeSection_Section_NomAndAnneeSection_AnneeAcademique(String sectionNom, String anneeAcademique);
-    List<Horaire> findByAnneeSectionId(Long id);
+
+    @Query("""
+                SELECT h FROM Horaire h
+                WHERE h.cours.anneeSection.section.nom = :sectionNom
+                  AND h.cours.anneeSection.anneeAcademique = :anneeAcademique
+            """)
+    List<Horaire> findBySectionNomAndAnneeAcademique(@Param("sectionNom") String sectionNom,
+                                                     @Param("anneeAcademique") String anneeAcademique);
 }

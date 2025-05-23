@@ -38,6 +38,6 @@ public class HoraireService {
     }
 
     public List<Horaire> getHoraireBySectionAndAnnee(String sectionNom, String anneeAcademique) {
-        return horaireRepository.findByAnneeSection_Section_NomAndAnneeSection_AnneeAcademique(sectionNom, anneeAcademique);
+        return horaireRepository.findBySectionNomAndAnneeAcademique(sectionNom, anneeAcademique);
     }
 }

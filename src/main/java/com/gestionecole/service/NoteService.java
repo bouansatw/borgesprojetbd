@@ -36,8 +36,9 @@ public class NoteService {
     }
 
     public List<Inscription> getInscriptionsByCours(Cours cours) {
-        return inscriptionService.getInscriptionsByCours(cours);
+        return inscriptionService.getInscriptionsByAnneeSection(cours.getAnneeSection());
     }
+
 
     @Transactional
     public void createOrUpdateNote(Note note) {
@@ -79,11 +80,8 @@ public class NoteService {
         noteRepository.save(noteToSave);
     }
 
-
     public List<Note> getNotesByInscription(Inscription inscription) {
         return noteRepository.findByInscription(inscription);
     }
-
-
 
 }

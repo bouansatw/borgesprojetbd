@@ -26,7 +26,11 @@ public class InscriptionService {
         return inscriptionRepository.findByEtudiant(etudiant);
     }
     public List<Inscription> getInscriptionsByCours(Cours cours) {
-        return inscriptionRepository.findByCours(cours);
+        return inscriptionRepository.findByAnneeSection(cours.getAnneeSection());
+    }
+
+    public List<Inscription> getInscriptionsByAnneeSection(com.gestionecole.model.AnneeSection anneeSection) {
+        return inscriptionRepository.findByAnneeSection(anneeSection);
     }
 
 }
