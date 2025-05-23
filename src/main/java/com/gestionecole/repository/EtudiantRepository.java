@@ -11,10 +11,6 @@ import java.util.Optional;
 @Repository
 public interface EtudiantRepository extends JpaRepository<Etudiant, Long> {
     Optional<Etudiant> findByEmail(String email);
-
     @EntityGraph(attributePaths = "section")
     Optional<Etudiant> findWithSectionByEmail(@Param("email") String email);
-
-
-    int countBySectionId(Long sectionId); // Utilisé pour calculer les places restantes
 }

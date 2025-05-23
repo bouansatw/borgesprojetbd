@@ -53,20 +53,14 @@ public class EtudiantService {
         return etudiantRepository.findWithSectionByEmail(email);
     }
 
-
-    public boolean isEtudiantInscrit(String email) {
-        return etudiantRepository.findByEmail(email)
-                .map(Etudiant::isInscrit)
-                .orElse(false);
-    }
-
     @Transactional
     public void registerStudent(Etudiant etudiant, Long sectionId) {
         // 1. Find section and check capacity
         Section section = sectionRepository.findById(sectionId)
                 .orElseThrow(() -> new IllegalStateException("Section non trouvée"));
 
-        int placesRestantes = section.getNbPlaces() - etudiantRepository.countBySectionId(sectionId);
+        int placesRestantes = section.getNbPlaces() - countEtudiantsInSection(sectionId);
+
         if (placesRestantes <= 0) {
             throw new IllegalStateException("Plus de places disponibles dans cette section.");
         }
@@ -123,19 +117,8 @@ public class EtudiantService {
     }
 
 
-    public Etudiant saveEtudiant(Etudiant etudiant) {
-        return etudiantRepository.save(etudiant);
-    }
-
-    public void deleteEtudiant(Long id) {
-        etudiantRepository.deleteById(id);
-    }
-
     public int countEtudiantsInSection(Long sectionId) {
-        return etudiantRepository.countBySectionId(sectionId);
+        return inscriptionRepository.countByAnneeSection_Section_Id(sectionId);
     }
 
-    public void save(Etudiant existingEtudiant) {
-        etudiantRepository.save(existingEtudiant);
-    }
 }

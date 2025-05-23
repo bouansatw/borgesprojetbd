@@ -11,6 +11,7 @@ import java.util.List;
 @Repository
 public interface InscriptionRepository extends JpaRepository<Inscription, Long> {
     List<Inscription> findByEtudiant(Etudiant etudiant);
-    boolean existsByEtudiantAndCours(Etudiant etudiant, Cours cours);
+
+    int countByAnneeSection_Section_Id(Long sectionId);
     List<Inscription> findByCours(Cours cours);
 }
