@@ -35,11 +35,17 @@ class EtudiantServiceTest {
 
         String academicYear = "2024-2025";
 
-        AnneeSection anneeSection = new AnneeSection(academicYear, section);
+        AnneeSection anneeSection = new AnneeSection();
+        anneeSection.setAnneeAcademique(academicYear);
+        anneeSection.setSection(section);
         anneeSectionRepository.save(anneeSection);
 
         Cours cours = new Cours();
         cours.setIntitule("Java avancé");
+        cours.setCode("JAV401");
+        cours.setCredits(5);
+        cours.setDescription("Cours avancé de Java");
+        cours.setAnneeSection(anneeSection);
         coursRepository.save(cours);
 
         Horaire horaire = new Horaire();
@@ -47,7 +53,6 @@ class EtudiantServiceTest {
         horaire.setHeureDebut("08:00");
         horaire.setHeureFin("10:00");
         horaire.setCours(cours);
-        horaire.setAnneeSection(anneeSection);
         horaireRepository.save(horaire);
 
         Etudiant etudiant = new Etudiant();
@@ -61,14 +66,18 @@ class EtudiantServiceTest {
 
         // Assert
         Etudiant saved = etudiantRepository.findByEmail("alice.durand@ecole.be").orElseThrow();
-
         assertThat(saved.getMatricule()).matches("E-\\d{5}");
-        assertThat(saved.getSection()).isEqualTo(section);
-        assertThat(saved.getAnneeSection()).isEqualTo(anneeSection);
         assertThat(passwordEncoder.matches("pass123", saved.getPassword())).isTrue();
 
         List<Inscription> inscriptions = inscriptionRepository.findByEtudiant(saved);
         assertThat(inscriptions).hasSize(1);
-        assertThat(inscriptions.getFirst().getCours().getIntitule()).isEqualTo("Java avancé");
+
+        AnneeSection savedAnneeSection = inscriptions.getFirst().getAnneeSection();
+        assertThat(savedAnneeSection.getSection()).isEqualTo(section);
+        assertThat(savedAnneeSection.getAnneeAcademique()).isEqualTo(academicYear);
+
+        List<Cours> coursList = coursRepository.findAll();
+        assertThat(coursList).anyMatch(c -> c.getIntitule().equals("Java avancé"));
     }
+
 }
