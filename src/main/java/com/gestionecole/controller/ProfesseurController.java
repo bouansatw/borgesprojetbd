@@ -2,13 +2,12 @@ package com.gestionecole.controller;
 
 import com.gestionecole.model.Cours;
 import com.gestionecole.model.Etudiant;
+import com.gestionecole.model.Inscription;
 import com.gestionecole.model.Note;
-import com.gestionecole.model.Professeur;
 import com.gestionecole.service.CoursService;
 import com.gestionecole.service.HoraireService;
 import com.gestionecole.service.NoteService;
 import com.gestionecole.service.ProfesseurService;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,6 +17,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/professeur")
@@ -37,71 +37,66 @@ public class ProfesseurController {
 
     @GetMapping("/cours")
     public String voirCours(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        Professeur professeur = professeurService.getProfesseurByEmail(email).orElse(null);
-        if (professeur != null) {
-            model.addAttribute("cours", coursService.getCoursByProfesseur(professeur));
-        }
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        professeurService.getProfesseurByEmail(email)
+                .ifPresent(professeur -> model.addAttribute("cours", coursService.getCoursByProfesseur(professeur)));
         return "professeur/cours/liste";
     }
 
-
     @GetMapping("/horaires")
     public String voirHoraires(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        Professeur professeur = professeurService.getProfesseurByEmail(email).orElse(null);
-        if (professeur != null) {
-            model.addAttribute("horaires", horaireService.getHorairesByProfesseur(professeur));
-        }
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        professeurService.getProfesseurByEmail(email)
+                .ifPresent(professeur -> model.addAttribute("horaires", horaireService.getHorairesByProfesseur(professeur)));
         return "professeur/horaires/liste";
     }
 
     @GetMapping("/notes")
     public String listeCoursNotes(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        Professeur professeur = professeurService.getProfesseurByEmail(email).orElse(null);
-        if (professeur != null) {
-            model.addAttribute("cours", coursService.getCoursByProfesseur(professeur));
-        }
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        professeurService.getProfesseurByEmail(email)
+                .ifPresent(professeur -> model.addAttribute("cours", coursService.getCoursByProfesseur(professeur)));
         return "professeur/notes/liste_cours";
     }
-
 
     @GetMapping("/notes/{coursId}")
     public String listeEtudiantsPourCours(@PathVariable Long coursId, Model model) {
         Cours cours = coursService.getCoursById(coursId).orElse(null);
         if (cours != null) {
-            List<Etudiant> etudiants = noteService.getEtudiantsInscritsAuCours(cours);
+            List<Inscription> inscriptions = noteService.getInscriptionsByCours(cours);
             Map<Long, Note> notes = new HashMap<>();
-            for (Etudiant etudiant : etudiants) {
-                noteService.getNoteByEtudiantAndCours(etudiant.getId(), cours.getId())
-                        .ifPresent(note -> notes.put(etudiant.getId(), note));
+
+            for (Inscription inscription : inscriptions) {
+                noteService.getNoteByInscriptionAndCours(inscription.getId(), cours.getId())
+                        .ifPresent(note -> notes.put(inscription.getEtudiant().getId(), note));
             }
+
             model.addAttribute("cours", cours);
-            model.addAttribute("etudiants", etudiants);
+            model.addAttribute("inscriptions", inscriptions);
             model.addAttribute("notes", notes);
         }
         return "professeur/notes/liste_etudiants";
     }
 
 
-    @GetMapping("/notes/modifier/{etudiantId}/{coursId}")
-    public String modifierNoteForm(@PathVariable Long etudiantId, @PathVariable Long coursId, Model model) {
-        Note note = noteService.getNoteByEtudiantAndCours(etudiantId, coursId).orElseGet(() -> {
-            Note nouvelleNote = new Note();
+    @GetMapping("/notes/modifier/{inscriptionId}/{coursId}")
+    public String modifierNoteForm(@PathVariable Long inscriptionId, @PathVariable Long coursId, Model model) {
+        Optional<Note> noteOpt = noteService.getNoteByInscriptionAndCours(inscriptionId, coursId);
+
+        Note note = noteOpt.orElseGet(() -> {
+            Note newNote = new Note();
+            Inscription inscription = new Inscription();
+            inscription.setId(inscriptionId);
             Etudiant etudiant = new Etudiant();
-            etudiant.setId(etudiantId);
-            etudiant.setNom("Etudiant inconnu"); // 🔥 Placeholder value to avoid Thymeleaf error
-            etudiant.setPrenom("");              // 🔥
+            etudiant.setNom("Inconnu");
+            inscription.setEtudiant(etudiant); // placeholder
+            newNote.setInscription(inscription);
+
             Cours cours = new Cours();
             cours.setId(coursId);
-            cours.setIntitule("Cours inconnu");  // 🔥 Placeholder too
-            nouvelleNote.setEtudiant(etudiant);
-            nouvelleNote.setCours(cours);
-            return nouvelleNote;
+            cours.setIntitule("Inconnu");
+            newNote.setCours(cours);
+            return newNote;
         });
 
         model.addAttribute("note", note);
@@ -112,9 +107,9 @@ public class ProfesseurController {
     @PostMapping("/notes/modifier")
     public String enregistrerNote(@ModelAttribute("note") Note note,
                                   RedirectAttributes redirectAttributes) {
-        if (note.getEtudiant() == null || note.getEtudiant().getId() == null
+        if (note.getInscription() == null || note.getInscription().getId() == null
                 || note.getCours() == null || note.getCours().getId() == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Note incomplète : étudiant ou cours manquant.");
+            redirectAttributes.addFlashAttribute("errorMessage", "Note incomplète : inscription ou cours manquant.");
             return "redirect:/professeur/notes/" + (note.getCours() != null ? note.getCours().getId() : "");
         }
 
@@ -127,5 +122,4 @@ public class ProfesseurController {
 
         return "redirect:/professeur/notes/" + note.getCours().getId();
     }
-
 }

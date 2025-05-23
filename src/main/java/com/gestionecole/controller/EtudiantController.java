@@ -1,5 +1,6 @@
 package com.gestionecole.controller;
 
+import com.gestionecole.model.Inscription;
 import com.gestionecole.service.EtudiantService;
 import com.gestionecole.service.HoraireService;
 import com.gestionecole.service.InscriptionService;
@@ -11,6 +12,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/etudiant")
 public class EtudiantController {
@@ -20,7 +23,10 @@ public class EtudiantController {
     private final HoraireService horaireService;
     private final NoteService noteService;
 
-    public EtudiantController(EtudiantService etudiantService, InscriptionService inscriptionService, HoraireService horaireService, NoteService noteService) {
+    public EtudiantController(EtudiantService etudiantService,
+                              InscriptionService inscriptionService,
+                              HoraireService horaireService,
+                              NoteService noteService) {
         this.etudiantService = etudiantService;
         this.inscriptionService = inscriptionService;
         this.horaireService = horaireService;
@@ -29,35 +35,36 @@ public class EtudiantController {
 
     @GetMapping("/cours")
     public String voirCours(Model model) {
-        String email = getCurrentUserEmail();
-        etudiantService.getEtudiantByEmail(email).ifPresent(etudiant -> {
-            model.addAttribute("inscriptions", inscriptionService.getInscriptionsByEtudiant(etudiant));
+        etudiantService.getEtudiantByEmail(getCurrentUserEmail()).ifPresent(etudiant -> {
+            List<Inscription> inscriptions = inscriptionService.getInscriptionsByEtudiant(etudiant);
+            model.addAttribute("inscriptions", inscriptions);
         });
         return "etudiant/cours";
     }
 
     @GetMapping("/horaire")
     public String voirHoraire(Model model) {
-        String email = getCurrentUserEmail();
-        etudiantService.getEtudiantByEmail(email).ifPresent(etudiant -> {
-            if (etudiant.getAnneeSection() != null && etudiant.getAnneeSection().getSection() != null) {
-                model.addAttribute("horaires", horaireService.getHoraireBySectionAndAnnee(
-                        etudiant.getAnneeSection().getSection().getNom(),
-                        etudiant.getAnneeSection().getAnneeAcademique()
-                ));
+        etudiantService.getEtudiantByEmail(getCurrentUserEmail()).ifPresent(etudiant -> {
+            List<Inscription> inscriptions = inscriptionService.getInscriptionsByEtudiant(etudiant);
+            if (!inscriptions.isEmpty()) {
+                // Assume all inscriptions belong to the same AnneeSection
+                String sectionNom = inscriptions.get(0).getAnneeSection().getSection().getNom();
+                String annee = inscriptions.get(0).getAnneeSection().getAnneeAcademique();
+                model.addAttribute("horaires", horaireService.getHoraireBySectionAndAnnee(sectionNom, annee));
             } else {
-                model.addAttribute("horaires", null); // or empty list if you prefer
+                model.addAttribute("horaires", List.of());
             }
         });
         return "etudiant/horaire";
     }
 
-
     @GetMapping("/note")
     public String voirNotes(Model model) {
-        String email = getCurrentUserEmail();
-        etudiantService.getEtudiantByEmail(email).ifPresent(etudiant -> {
-            model.addAttribute("notes", noteService.getNotesByEtudiant(etudiant));
+        etudiantService.getEtudiantByEmail(getCurrentUserEmail()).ifPresent(etudiant -> {
+            List<Inscription> inscriptions = inscriptionService.getInscriptionsByEtudiant(etudiant);
+            model.addAttribute("notes", inscriptions.stream()
+                    .flatMap(inscription -> noteService.getNotesByInscription(inscription).stream())
+                    .toList());
         });
         return "etudiant/note";
     }
