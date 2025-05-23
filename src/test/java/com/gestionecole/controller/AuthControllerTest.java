@@ -99,14 +99,23 @@ class AuthControllerTest {
         Section section = new Section("Cyber", 30);
         sectionRepository.save(section);
 
+        AnneeSection anneeSection = new AnneeSection();
+        anneeSection.setAnneeAcademique("2024-2025");
+        anneeSection.setSection(section);
+        anneeSectionRepository.save(anneeSection); // 🔥 Save it before referencing
+
         Etudiant etudiant = new Etudiant();
         etudiant.setNom("Etudiant");
         etudiant.setPrenom("Inscrit");
         etudiant.setEmail("etudiant.inscrit@ecole.be");
         etudiant.setPassword(passwordEncoder.encode("etudiant123"));
         etudiant.setRole("ROLE_ETUDIANT");
-        etudiant.setSection(section);
         etudiantRepository.save(etudiant);
+
+        Inscription inscription = new Inscription();
+        inscription.setEtudiant(etudiant);
+        inscription.setAnneeSection(anneeSection);
+        inscriptionRepository.save(inscription);
 
         mockMvc.perform(formLogin("/auth/login")
                         .user("etudiant.inscrit@ecole.be")
@@ -114,6 +123,7 @@ class AuthControllerTest {
                 .andExpect(authenticated().withUsername("etudiant.inscrit@ecole.be"))
                 .andExpect(redirectedUrl("/etudiant/cours"));
     }
+
 
 
     @Test
@@ -168,11 +178,18 @@ class AuthControllerTest {
 
         String academicYear = "2024-2025";
 
-        AnneeSection anneeSection = new AnneeSection(academicYear, section);
+        AnneeSection anneeSection = new AnneeSection();
+        anneeSection.setAnneeAcademique(academicYear);
+        anneeSection.setSection(section);
         anneeSectionRepository.save(anneeSection);
 
         Cours cours = new Cours();
         cours.setIntitule("Sécurité Réseau");
+        cours.setCode("SEC401");
+        cours.setCredits(5);
+        cours.setDescription("Cours de sécurité avancée");
+        cours.setAnneeSection(anneeSection);
+        anneeSection.getCours().add(cours);
         coursRepository.save(cours);
 
         Horaire horaire = new Horaire();
@@ -180,7 +197,6 @@ class AuthControllerTest {
         horaire.setHeureDebut("10:00");
         horaire.setHeureFin("12:00");
         horaire.setCours(cours);
-        horaire.setAnneeSection(anneeSection);
         horaireRepository.save(horaire);
 
         // Act: Submit registration form
@@ -199,12 +215,14 @@ class AuthControllerTest {
 
         assertThat(saved.getMatricule()).matches("E-\\d{5}");
         assertThat(passwordEncoder.matches("Valjean123", saved.getPassword())).isTrue();
-        assertThat(saved.getSection()).isEqualTo(section);
-        assertThat(saved.getAnneeSection().getAnneeAcademique()).isEqualTo(academicYear);
 
         List<Inscription> inscriptions = inscriptionRepository.findByEtudiant(saved);
         assertThat(inscriptions).hasSize(1);
-        assertThat(inscriptions.get(0).getCours().getIntitule()).isEqualTo("Sécurité Réseau");
+        assertThat(inscriptions.get(0).getAnneeSection().getSection()).isEqualTo(section);
+        assertThat(inscriptions.get(0).getAnneeSection().getAnneeAcademique()).isEqualTo(academicYear);
+
+        List<Cours> coursList = coursRepository.findAll();
+        assertThat(coursList).anyMatch(c -> c.getIntitule().equals("Sécurité Réseau"));
     }
 
 
@@ -238,12 +256,16 @@ class AuthControllerTest {
         etudiant.setPassword(encoder.encode("Pass1234"));
         etudiant.setMatricule("E-10009");
         etudiant.setRole("ROLE_ETUDIANT");
-        etudiant.setSection(null);
+        // Section is no longer directly set on Etudiant, so we skip setSection()
         etudiantRepository.save(etudiant);
 
-        String storedHash = etudiantRepository.findByEmail("bob.martin@ecole.be").orElseThrow().getPassword();
+        String storedHash = etudiantRepository.findByEmail("bob.martin@ecole.be")
+                .orElseThrow()
+                .getPassword();
+
         assertTrue(encoder.matches("Pass1234", storedHash));
     }
+
 
 
     @Test
@@ -274,14 +296,24 @@ class AuthControllerTest {
         Section section = new Section("Réseaux", 1);
         sectionRepository.save(section);
 
+        AnneeSection anneeSection = new AnneeSection();
+        anneeSection.setAnneeAcademique("2024-2025");
+        anneeSection.setSection(section);
+        anneeSectionRepository.save(anneeSection);
+
         Etudiant existingEtudiant = new Etudiant();
         existingEtudiant.setNom("John");
         existingEtudiant.setPrenom("Doe");
         existingEtudiant.setEmail("john.doe@ecole.be");
         existingEtudiant.setPassword(passwordEncoder.encode("password"));
         existingEtudiant.setRole("ROLE_ETUDIANT");
-        existingEtudiant.setSection(section);
+        existingEtudiant.setMatricule("E-10001");
         etudiantRepository.save(existingEtudiant);
+
+        Inscription inscription = new Inscription();
+        inscription.setEtudiant(existingEtudiant);
+        inscription.setAnneeSection(anneeSection);
+        inscriptionRepository.save(inscription);
 
         // Act
         mockMvc.perform(

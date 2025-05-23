@@ -12,6 +12,5 @@ import java.util.List;
 public interface InscriptionRepository extends JpaRepository<Inscription, Long> {
     List<Inscription> findByEtudiant(Etudiant etudiant);
     int countByAnneeSection_Section_Id(Long sectionId);
-
     List<Inscription> findByAnneeSection(AnneeSection anneeSection);
 }

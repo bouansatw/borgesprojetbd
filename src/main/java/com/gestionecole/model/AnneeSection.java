@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -23,7 +24,13 @@ public class AnneeSection {
     private Section section;
 
     @OneToMany(mappedBy = "anneeSection", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Cours> cours;
+    private List<Cours> cours = new ArrayList<>();
+
+
+    public AnneeSection(String anneeAcademique, Section section) {
+        this.anneeAcademique = anneeAcademique;
+        this.section = section;
+    }
 
 
     @Override
