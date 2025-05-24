@@ -71,8 +71,13 @@ public class ProfesseurController {
                         .ifPresent(note -> notes.put(inscription.getEtudiant().getId(), note));
             }
 
+            List<Etudiant> etudiants = inscriptions.stream()
+                    .map(Inscription::getEtudiant)
+                    .toList();
+
             model.addAttribute("cours", cours);
             model.addAttribute("inscriptions", inscriptions);
+            model.addAttribute("etudiants", etudiants); // ✅ ADD THIS
             model.addAttribute("notes", notes);
         }
         return "professeur/notes/liste_etudiants";
@@ -111,6 +116,13 @@ public class ProfesseurController {
                 || note.getCours() == null || note.getCours().getId() == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Note incomplète : inscription ou cours manquant.");
             return "redirect:/professeur/notes/" + (note.getCours() != null ? note.getCours().getId() : "");
+        }
+
+        // ✅ Business rule: no deuxième session without première session
+        if (note.getPremiereSession() == null && note.getDeuxiemeSession() != null) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Impossible d'entrer une note de deuxième session si la note de première session est absente.");
+            return "redirect:/professeur/notes/" + note.getCours().getId();
         }
 
         try {

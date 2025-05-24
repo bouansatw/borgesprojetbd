@@ -10,11 +10,14 @@
 <div th:replace="fragments/header :: header"></div>
 
 <div class="container">
-    <h2>Modifier Note pour l'Étudiant : <span th:text="${note.etudiant.nom + ' ' + note.etudiant.prenom}"></span></h2>
+    <h2>Modifier Note pour l'Étudiant :
+        <span th:text="${note.inscription.etudiant.nom + ' ' + note.inscription.etudiant.prenom}"></span>
+    </h2>
+
     <h3>Cours : <span th:text="${note.cours.intitule}"></span></h3>
 
     <form th:action="@{/professeur/notes/modifier}" method="post" th:object="${note}">
-        <input type="hidden" th:field="*{etudiant.id}" />
+        <input th:field="*{inscription.id}" type="hidden"/>
         <input type="hidden" th:field="*{cours.id}" />
 
         <div class="mb-3">
@@ -29,8 +32,6 @@
 
         <button type="submit" class="btn btn-primary">Enregistrer</button>
     </form>
-
-
 
 </div>
 
