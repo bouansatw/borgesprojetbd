@@ -73,8 +73,6 @@ VALUES (1, 1, now()),
        (2, 1, now()),
        (3, 1, now());
 
--- Assign IDs manually to map inscription → note
--- Assuming the above inserts generate IDs 1, 2, 3 respectively
 -- Insert Notes
 INSERT INTO note (inscription_id, cours_id, premiere_session, deuxieme_session)
 VALUES (1, 1, NULL, NULL),
@@ -88,5 +86,5 @@ VALUES (1, 1, NULL, NULL),
        (3, 4, NULL, NULL),
        (3, 5, NULL, NULL);
 
--- Reset user ID sequence for consistency
+-- Reset only the utilisateur ID sequence
 SELECT setval('utilisateur_id_seq', (SELECT MAX(id) FROM utilisateur));

@@ -21,11 +21,11 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="inscription : ${inscriptions}">
-            <td th:text="${inscription.cours.intitule}"></td> <!-- 🔥 Correct field -->
-            <td th:text="${inscription.cours.code}"></td>
-            <td th:text="${inscription.cours.credits}"></td>
-            <td th:text="${inscription.cours.description}"></td>
+        <tr th:each="cours : ${cours}">
+            <td th:text="${cours.intitule}"></td>
+            <td th:text="${cours.code}"></td>
+            <td th:text="${cours.credits}"></td>
+            <td th:text="${cours.description}"></td>
         </tr>
         </tbody>
 
