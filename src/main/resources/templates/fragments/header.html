@@ -15,7 +15,8 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
+            <ul class="navbar-nav me-auto">
+                <!-- Left-aligned links -->
                 <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="/">Accueil</a>
                 </li>
@@ -43,12 +44,21 @@
                 <li class="nav-item" sec:authorize="hasRole('PROFESSEUR')">
                     <a class="nav-link" href="/professeur/notes">Gérer Notes</a>
                 </li>
+            </ul>
+
+            <ul class="navbar-nav ms-auto">
+                <!-- Right-aligned info and logout -->
+                <li class="nav-item d-flex align-items-center text-light" sec:authorize="isAuthenticated()">
+                    <span class="nav-link disabled"
+                          th:text="'Connecté en tant que ' + ${currentUser.prenom} + ' ' + ${currentUser.nom}">Nom Prénom</span>
+                </li>
                 <li class="nav-item" sec:authorize="isAuthenticated()">
                     <form th:action="@{/logout}" method="post">
                         <button type="submit" class="btn btn-link nav-link">Déconnexion</button>
                     </form>
                 </li>
             </ul>
+
         </div>
     </div>
 </nav>
