@@ -34,9 +34,9 @@
             <td th:text="${etudiant.prenom}"></td>
             <td th:text="${etudiant.email}"></td>
 
-            <!-- ✅ Corrected: use notes[etudiant.id] -->
-            <td th:text="${notes[etudiant.id] != null ? notes[etudiant.id].premiereSession : '—'}"></td>
-            <td th:text="${notes[etudiant.id] != null ? notes[etudiant.id].deuxiemeSession : '—'}"></td>
+            <td th:text="${notes[etudiant.id]?.premiereSession ?: '—'}"></td>
+            <td th:text="${notes[etudiant.id]?.deuxiemeSession ?: '—'}"></td>
+
 
             <td>
                 <a th:href="@{/professeur/notes/modifier/{etudiantId}/{coursId}(etudiantId=${etudiant.id}, coursId=${cours.id})}" class="btn btn-primary">Modifier Note</a>
