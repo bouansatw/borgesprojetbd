@@ -34,7 +34,7 @@ public class HoraireService {
     }
 
     public List<Horaire> getHorairesByProfesseur(Professeur professeur) {
-        return horaireRepository.findAll(); // à remplacer si besoin d'une vraie méthode
+        return horaireRepository.findByCours_Professeur(professeur);
     }
 
     public List<Horaire> getHoraireBySectionAndAnnee(String sectionNom, String anneeAcademique) {
