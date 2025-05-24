@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Getter
@@ -29,8 +30,9 @@ public class Inscription {
     @JoinColumn(name = "annee_section_id", nullable = false)
     private AnneeSection anneeSection;
 
-    @OneToMany(mappedBy = "inscription", cascade = CascadeType.ALL)
-    private java.util.List<Note> notes;
+    @OneToMany(mappedBy = "inscription", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Note> notes;
+
 
     @Override
     public String toString() {

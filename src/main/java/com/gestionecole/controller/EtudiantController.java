@@ -1,5 +1,6 @@
 package com.gestionecole.controller;
 
+import com.gestionecole.model.Cours;
 import com.gestionecole.model.Inscription;
 import com.gestionecole.service.EtudiantService;
 import com.gestionecole.service.HoraireService;
@@ -38,9 +39,17 @@ public class EtudiantController {
         etudiantService.getEtudiantByEmail(getCurrentUserEmail()).ifPresent(etudiant -> {
             List<Inscription> inscriptions = inscriptionService.getInscriptionsByEtudiant(etudiant);
             model.addAttribute("inscriptions", inscriptions);
+
+            // Add all cours directly from inscriptions
+            List<Cours> cours = inscriptions.stream()
+                    .flatMap(inscription -> inscription.getAnneeSection().getCours().stream())
+                    .distinct()
+                    .toList();
+            model.addAttribute("cours", cours);
         });
         return "etudiant/cours";
     }
+
 
     @GetMapping("/horaire")
     public String voirHoraire(Model model) {

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -88,7 +89,19 @@ public class EtudiantService {
         inscription.setEtudiant(etudiant);
         inscription.setAnneeSection(anneeSection);
         inscription.setDateInscription(LocalDate.now());
-        inscription = inscriptionRepository.save(inscription);
+
+        List<Note> notes = new ArrayList<>();
+        for (Cours cours : anneeSection.getCours()) {
+            Note note = new Note();
+            note.setInscription(inscription);      // set back-reference
+            note.setCours(cours);
+            note.setPremiereSession(null);
+            note.setDeuxiemeSession(null);
+            notes.add(note);                       // add to list
+        }
+        inscription.setNotes(notes);              // link notes to inscription
+        inscriptionRepository.save(inscription);  // cascade persists notes
+
 
         // 8. Enroll student into all courses for that academic section
         List<Cours> coursList = anneeSection.getCours(); // make sure AnneeSection has getCours() mapped correctly
