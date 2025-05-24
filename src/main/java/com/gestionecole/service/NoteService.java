@@ -84,4 +84,7 @@ public class NoteService {
         return noteRepository.findByInscription(inscription);
     }
 
+    public Optional<Inscription> getInscriptionById(Long inscriptionId) {
+        return inscriptionService.getInscriptionById(inscriptionId);
+    }
 }

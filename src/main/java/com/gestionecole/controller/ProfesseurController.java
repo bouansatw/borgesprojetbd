@@ -1,6 +1,9 @@
 package com.gestionecole.controller;
 
-import com.gestionecole.model.*;
+import com.gestionecole.model.Cours;
+import com.gestionecole.model.Inscription;
+import com.gestionecole.model.Note;
+import com.gestionecole.model.Professeur;
 import com.gestionecole.service.CoursService;
 import com.gestionecole.service.HoraireService;
 import com.gestionecole.service.NoteService;
@@ -79,27 +82,35 @@ public class ProfesseurController {
     }
 
     @GetMapping("/notes/modifier/{inscriptionId}/{coursId}")
-    public String modifierNoteForm(@PathVariable Long inscriptionId, @PathVariable Long coursId, Model model) {
+    public String modifierNoteForm(@PathVariable Long inscriptionId,
+                                   @PathVariable Long coursId,
+                                   Model model,
+                                   RedirectAttributes redirectAttributes) {
+
         Optional<Note> noteOpt = noteService.getNoteByInscriptionAndCours(inscriptionId, coursId);
-        Note note = noteOpt.orElseGet(() -> {
-            Note newNote = new Note();
-            Inscription inscription = new Inscription();
-            inscription.setId(inscriptionId);
-            Etudiant etudiant = new Etudiant();
-            etudiant.setNom("Inconnu");
-            inscription.setEtudiant(etudiant);
-            newNote.setInscription(inscription);
-            Cours cours = new Cours();
-            cours.setId(coursId);
-            cours.setIntitule("Inconnu");
-            newNote.setCours(cours);
-            return newNote;
-        });
+
+        Note note;
+        if (noteOpt.isPresent()) {
+            note = noteOpt.get();
+        } else {
+            Optional<Inscription> optInscription = noteService.getInscriptionById(inscriptionId);
+            Optional<Cours> optCours = coursService.getCoursById(coursId);
+
+            if (optInscription.isEmpty() || optCours.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Inscription ou cours introuvable.");
+                return "redirect:/professeur/notes";
+            }
+
+            note = new Note();
+            note.setInscription(optInscription.get());
+            note.setCours(optCours.get());
+        }
 
         model.addAttribute("note", note);
         model.addAttribute("coursId", coursId);
         return "professeur/notes/modifier";
     }
+
 
     @PostMapping("/notes/modifier")
     public String enregistrerNote(@ModelAttribute("note") Note note, RedirectAttributes redirectAttributes) {
