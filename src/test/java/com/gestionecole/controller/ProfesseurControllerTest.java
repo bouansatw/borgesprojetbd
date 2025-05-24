@@ -1,10 +1,7 @@
 package com.gestionecole.controller;
 
 import com.gestionecole.model.*;
-import com.gestionecole.repository.AnneeSectionRepository;
-import com.gestionecole.repository.CoursRepository;
-import com.gestionecole.repository.HoraireRepository;
-import com.gestionecole.repository.SectionRepository;
+import com.gestionecole.repository.*;
 import com.gestionecole.service.CoursService;
 import com.gestionecole.service.HoraireService;
 import com.gestionecole.service.NoteService;
@@ -53,8 +50,19 @@ class ProfesseurControllerTest {
     @MockBean
     private NoteService noteService;
 
+    @MockBean
+    private UtilisateurRepository utilisateurRepository;
+
     @BeforeEach
     void setUp() {
+        Professeur professeur = new Professeur();
+        professeur.setPrenom("Jean");
+        professeur.setNom("Dupont");
+        professeur.setEmail("professeur@ecole.be");
+
+        when(utilisateurRepository.findByEmail("professeur@ecole.be"))
+                .thenReturn(Optional.of(professeur));
+
         Section section = new Section();
         section.setNom("Informatique");
         section.setNbPlaces(30); // required if non-null in schema

@@ -1,6 +1,7 @@
 package com.gestionecole.controller;
 
 import com.gestionecole.model.*;
+import com.gestionecole.repository.UtilisateurRepository;
 import com.gestionecole.service.EtudiantService;
 import com.gestionecole.service.HoraireService;
 import com.gestionecole.service.InscriptionService;
@@ -41,6 +42,10 @@ public class EtudiantControllerTest {
     @MockBean
     private NoteService noteService;
 
+    @MockBean
+    private UtilisateurRepository utilisateurRepository;
+
+
     private Etudiant etudiant;
     private Inscription inscription;
     private AnneeSection anneeSection;
@@ -50,7 +55,16 @@ public class EtudiantControllerTest {
     @BeforeEach
     void setup() {
         etudiant = new Etudiant();
+        etudiant.setEmail("student@example.com");
+        etudiant.setPrenom("Alice");
+        etudiant.setNom("Durand");
         etudiant.setId(1L);
+
+        when(utilisateurRepository.findByEmail("student@example.com"))
+                .thenReturn(Optional.of(etudiant));
+
+        when(etudiantService.getEtudiantByEmail("student@example.com"))
+                .thenReturn(Optional.of(etudiant));
 
         section = new Section();
         section.setNom("Informatique");
