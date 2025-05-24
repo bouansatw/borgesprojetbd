@@ -59,6 +59,19 @@ VALUES ('NET101', 'Fundamentals of Networking', 'Introduction to computer networ
         1),
        ('NET501', 'Cloud Networking', 'Networking in cloud environments: AWS, Azure, hybrid networking.', 5, 4, 1);
 
+-- Insert Cours for Cyber section (annee_section_id = 2)
+INSERT INTO cours (code, intitule, description, credits, professeur_id, annee_section_id)
+VALUES ('CYB101', 'Intro to Cybersecurity', 'Cyber threat landscape, CIA triad, basic risk management.', 5, 5, 2),
+       ('CYB201', 'Cryptography Basics', 'Symmetric/asymmetric encryption, hashing, PKI.', 5, 5, 2),
+       ('CYB301', 'Ethical Hacking', 'Pentesting techniques, Kali Linux tools, vulnerabilities.', 5, 6, 2);
+
+-- Insert Cours for Electronique section (annee_section_id = 3)
+INSERT INTO cours (code, intitule, description, credits, professeur_id, annee_section_id)
+VALUES ('ELEC101', 'Circuit Analysis', 'Ohm’s law, Kirchhoff’s laws, circuit theorems.', 5, 6, 3),
+       ('ELEC201', 'Digital Electronics', 'Logic gates, flip-flops, microcontroller basics.', 5, 7, 3);
+
+
+
 -- Insert Horaire (for cours 1 to 5)
 INSERT INTO horaire (cours_id, heure_debut, heure_fin, jour)
 VALUES (1, '18:00', '21:30', 'LUNDI'),
