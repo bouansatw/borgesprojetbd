@@ -59,18 +59,6 @@ VALUES ('NET101', 'Fundamentals of Networking', 'Introduction to computer networ
         1),
        ('NET501', 'Cloud Networking', 'Networking in cloud environments: AWS, Azure, hybrid networking.', 5, 4, 1);
 
--- Insert Cours for Cyber section (annee_section_id = 2)
-INSERT INTO cours (code, intitule, description, credits, professeur_id, annee_section_id)
-VALUES ('CYB101', 'Intro to Cybersecurity', 'Cyber threat landscape, CIA triad, basic risk management.', 5, 5, 2),
-       ('CYB201', 'Cryptography Basics', 'Symmetric/asymmetric encryption, hashing, PKI.', 5, 5, 2),
-       ('CYB301', 'Ethical Hacking', 'Pentesting techniques, Kali Linux tools, vulnerabilities.', 5, 6, 2);
-
--- Insert Cours for Electronique section (annee_section_id = 3)
-INSERT INTO cours (code, intitule, description, credits, professeur_id, annee_section_id)
-VALUES ('ELEC101', 'Circuit Analysis', 'Ohm’s law, Kirchhoff’s laws, circuit theorems.', 5, 6, 3),
-       ('ELEC201', 'Digital Electronics', 'Logic gates, flip-flops, microcontroller basics.', 5, 7, 3);
-
-
 
 -- Insert Horaire (for cours 1 to 5)
 INSERT INTO horaire (cours_id, heure_debut, heure_fin, jour)
@@ -101,3 +89,46 @@ VALUES (1, 1, NULL, NULL),
 
 -- Reset only the utilisateur ID sequence
 SELECT setval('utilisateur_id_seq', (SELECT MAX(id) FROM utilisateur));
+
+-- ============================================
+-- Additional data for Cyber and Electronique
+-- ============================================
+
+-- Insert Cours for Cyber (section_id=2 => annee_section_id=2)
+INSERT INTO cours (code, intitule, description, credits, professeur_id, annee_section_id)
+VALUES ('CYB101', 'Intro to Cybersecurity', 'Cyber threat landscape, CIA triad, basic risk management.', 5, 5, 2),
+       ('CYB201', 'Cryptography Basics', 'Symmetric/asymmetric encryption, hashing, PKI.', 5, 5, 2),
+       ('CYB301', 'Ethical Hacking', 'Pentesting techniques, Kali Linux tools, vulnerabilities.', 5, 6, 2);
+
+-- Insert Cours for Electronique (section_id=3 => annee_section_id=3)
+INSERT INTO cours (code, intitule, description, credits, professeur_id, annee_section_id)
+VALUES ('ELEC101', 'Circuit Analysis', 'Ohm’s law, Kirchhoff’s laws, circuit theorems.', 5, 6, 3),
+       ('ELEC201', 'Digital Electronics', 'Logic gates, flip-flops, microcontroller basics.', 5, 7, 3);
+
+-- Insert Horaire for these new courses (assuming cours_id starts at 6)
+INSERT INTO horaire (cours_id, heure_debut, heure_fin, jour)
+VALUES (6, '18:00', '21:00', 'LUNDI'),
+       (7, '18:00', '21:00', 'MARDI'),
+       (8, '18:00', '21:00', 'MERCREDI'),
+       (9, '18:00', '21:00', 'JEUDI'),
+       (10, '18:00', '21:00', 'VENDREDI');
+
+-- Insert additional Inscriptions
+-- Alice (etudiant_id=1) in Cyber (annee_section_id=2)
+-- Charlie (etudiant_id=3) in Electronique (annee_section_id=3)
+INSERT INTO inscription (etudiant_id, annee_section_id, date_inscription)
+VALUES (1, 2, now()), -- id = 4
+       (3, 3, now());
+-- id = 5
+
+-- Insert Notes
+-- For Alice in Cyber courses
+INSERT INTO note (inscription_id, cours_id, premiere_session, deuxieme_session)
+VALUES (4, 6, NULL, NULL),
+       (4, 7, NULL, NULL),
+       (4, 8, NULL, NULL);
+
+-- For Charlie in Electronique courses
+INSERT INTO note (inscription_id, cours_id, premiere_session, deuxieme_session)
+VALUES (5, 9, NULL, NULL),
+       (5, 10, NULL, NULL);
